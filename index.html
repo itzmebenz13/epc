@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SHEIN Style Earner</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .shein-red { color: #ff4545; }
+        .bg-shein-red { background-color: #ff4545; }
+        .shein-black { background-color: #000; color: #fff; }
+        
+        /* Flash Sale Animation */
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        .animate-flash { animation: flash 2s infinite; }
+        
+        /* Slanted Progress Bar */
+        .skew-bar { transform: skewX(-10deg); }
+        
+        /* Coupon Edges */
+        .coupon-notch {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            background-color: #f3f4f6; /* matches bg-gray-100 */
+            border-radius: 50%;
+            z-index: 10;
+        }
+        .notch-left { left: -8px; border-right: 1px solid #d1d5db; }
+        .notch-right { right: -8px; border-left: 1px solid #d1d5db; }
+
+        /* Drawer Transition */
+        .drawer { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .drawer-closed { transform: translateY(100%); }
+        .drawer-open { transform: translateY(0); }
+
+        /* Hide Scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-900 min-h-screen pb-20 select-none overflow-x-hidden w-full">
+
+    <!-- Sticky Header -->
+    <div class="shein-black px-4 py-3 flex justify-between items-center sticky top-0 z-20 shadow-md">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-bag-shopping text-xl"></i>
+            <span class="font-black text-xl tracking-tighter italic">EARN<span class="shein-red">NOW</span></span>
+        </div>
+        <button id="settingsBtn" class="p-2 hover:bg-gray-800 rounded-full transition">
+            <i class="fa-solid fa-gear text-lg"></i>
+        </button>
+    </div>
+
+    <!-- Flash Sale Banner -->
+    <div class="bg-shein-red text-white text-xs font-bold py-1 px-2 flex justify-center items-center gap-2 animate-flash uppercase tracking-wide">
+        <i class="fa-solid fa-bolt"></i>
+        <span>Limited Time Earning Event</span>
+        <i class="fa-solid fa-bolt"></i>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-md mx-auto w-full pt-4 px-4 space-y-4">
+
+        <!-- Timer Card -->
+        <div class="bg-white p-6 shadow-sm relative overflow-hidden border-b-2 border-gray-200">
+            <div class="absolute top-0 left-0 shein-black text-[10px] font-bold px-2 py-1 uppercase tracking-widest">
+                Next Drop In
+            </div>
+            
+            <div class="text-center mt-4">
+                <div id="timerDisplay" class="text-6xl font-black tracking-tighter text-black tabular-nums">
+                    04:00
+                </div>
+                <p id="statusText" class="text-xs text-gray-400 font-bold uppercase tracking-[0.2em] mt-2">
+                    Start Mining
+                </p>
+            </div>
+
+            <!-- Cycle Progress Bar -->
+            <div class="mt-6 h-3 bg-gray-100 w-full overflow-hidden skew-bar border border-gray-200">
+                <div id="progressBar" class="h-full shein-black transition-all duration-300 ease-linear" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-2 gap-3">
+            <!-- Count Box -->
+            <div class="flex flex-col p-4 bg-white border border-gray-200 shadow-sm relative overflow-hidden">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Total Count</span>
+                <div class="flex items-baseline">
+                    <span id="countDisplay" class="text-3xl font-black tracking-tighter text-black truncate w-full">0</span>
+                    <span class="text-xs font-bold text-gray-400 ml-1 absolute right-4 bottom-5">PCS</span>
+                </div>
+            </div>
+
+            <!-- Earnings Box -->
+            <div class="flex flex-col p-4 bg-white border border-gray-200 border-b-2 border-b-black shadow-sm relative overflow-hidden">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Wallet</span>
+                <div class="flex items-baseline gap-0.5">
+                    <span class="text-sm font-bold mt-1 text-gray-900">₱</span>
+                    <span id="earningsDisplay" class="text-3xl font-black tracking-tighter shein-red truncate w-full">0.00</span>
+                </div>
+                <span id="rateDisplay" class="text-[10px] text-gray-400 font-medium mt-1 truncate">Rate: ₱1.00</span>
+            </div>
+        </div>
+
+        <!-- Goal / Coupon Tracker -->
+        <div class="bg-white relative shadow-sm border border-dashed border-gray-300 p-5 mt-2">
+            <!-- Cutout Circles -->
+            <div class="coupon-notch notch-left border-r border-gray-300"></div>
+            <div class="coupon-notch notch-right border-l border-gray-300"></div>
+            
+            <div class="flex justify-between items-end mb-2">
+                <div class="flex-1 pr-2 min-w-0">
+                    <h3 class="font-black text-lg uppercase italic text-black leading-none mb-1">Daily Goal</h3>
+                    <p id="goalText" class="text-xs text-gray-500 font-medium truncate">Reach 20 to complete</p>
+                </div>
+                <div id="goalPercentText" class="shein-black text-xs font-bold px-2 py-1 flex-shrink-0">
+                    0%
+                </div>
+            </div>
+            
+            <div class="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                <div id="goalBar" class="h-full bg-shein-red transition-all duration-500" style="width: 0%"></div>
+            </div>
+            
+            <!-- Goal Reached Banner -->
+            <div id="goalReachedMsg" class="hidden mt-3 bg-red-50 text-red-600 text-center py-2 text-xs font-bold border border-red-200 flex justify-center items-center gap-2">
+                <i class="fa-solid fa-gift animate-bounce"></i> GOAL REACHED!
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="grid grid-cols-4 gap-3 pt-2">
+            <button id="mainBtn" class="col-span-3 shein-black py-4 font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-lg hover:bg-gray-900">
+                <i class="fa-solid fa-play"></i> <span id="mainBtnText">Start Mining</span>
+            </button>
+            
+            <button id="resetBtn" class="col-span-1 bg-white border border-gray-300 text-gray-600 py-4 font-bold text-sm uppercase flex items-center justify-center active:scale-95 transition-transform hover:bg-gray-50">
+                <i class="fa-solid fa-rotate-left"></i>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Settings Drawer Overlay -->
+    <div id="drawerOverlay" class="fixed inset-0 bg-black/60 z-30 hidden backdrop-blur-sm"></div>
+
+    <!-- Settings Drawer -->
+    <div id="settingsDrawer" class="fixed bottom-0 left-0 right-0 bg-white z-40 rounded-t-3xl p-6 drawer drawer-closed shadow-[0_-10px_40px_rgba(0,0,0,0.2)] max-h-[85vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6 sticky top-0 bg-white z-10 pb-2 border-b border-gray-100">
+            <h2 class="text-xl font-black uppercase tracking-tighter">Config</h2>
+            <button id="closeSettings" class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="space-y-5">
+            <!-- Interval -->
+            <div>
+                <label class="block text-[10px] font-bold uppercase text-gray-400 mb-2">Timer Interval</label>
+                <div class="flex gap-4">
+                    <div class="flex-1 relative">
+                        <input type="number" id="inputMin" class="w-full bg-gray-50 border-b-2 border-gray-200 focus:border-black outline-none p-3 text-lg font-bold transition-colors" value="4">
+                        <span class="absolute right-3 top-4 text-[10px] font-bold text-gray-400">MIN</span>
+                    </div>
+                    <div class="flex-1 relative">
+                        <input type="number" id="inputSec" class="w-full bg-gray-50 border-b-2 border-gray-200 focus:border-black outline-none p-3 text-lg font-bold transition-colors" value="0">
+                        <span class="absolute right-3 top-4 text-[10px] font-bold text-gray-400">SEC</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rate -->
+            <div>
+                <label class="block text-[10px] font-bold uppercase text-gray-400 mb-2">Earnings per Count (₱)</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-3.5 text-lg font-bold text-gray-900">₱</span>
+                    <input type="number" id="inputRate" step="0.01" class="w-full bg-gray-50 border-b-2 border-gray-200 focus:border-black outline-none p-3 pl-8 text-lg font-bold transition-colors" value="1.00">
+                </div>
+            </div>
+
+            <!-- Goal Presets -->
+            <div>
+                <label class="block text-[10px] font-bold uppercase text-gray-400 mb-2">Target Goal</label>
+                <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar" id="goalContainer">
+                    <!-- Goals injected by JS -->
+                </div>
+                <div class="mt-2">
+                     <input type="number" id="customGoal" placeholder="Custom Goal" class="w-full bg-gray-50 border-b-2 border-gray-200 focus:border-black outline-none p-2 text-sm font-bold">
+                </div>
+            </div>
+
+            <button id="saveSettings" class="w-full bg-shein-red text-white py-4 font-black uppercase tracking-widest text-sm mt-4 active:scale-95 transition-transform shadow-lg mb-4">
+                Save Changes
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- State Management ---
+        const DEFAULT_STATE = {
+            goal: 20,
+            intervalMin: 4,
+            intervalSec: 0,
+            rate: 1.00,
+            startTime: null, // timestamp when started
+            offsetTime: 0,   // accumulated ms from previous sessions
+            isRunning: false
+        };
+
+        let state = JSON.parse(localStorage.getItem('shein_timer_v1')) || DEFAULT_STATE;
+
+        // --- DOM Elements ---
+        const els = {
+            timer: document.getElementById('timerDisplay'),
+            status: document.getElementById('statusText'),
+            bar: document.getElementById('progressBar'),
+            count: document.getElementById('countDisplay'),
+            earnings: document.getElementById('earningsDisplay'),
+            rateDisplay: document.getElementById('rateDisplay'),
+            goalText: document.getElementById('goalText'),
+            goalPercent: document.getElementById('goalPercentText'),
+            goalBar: document.getElementById('goalBar'),
+            goalMsg: document.getElementById('goalReachedMsg'),
+            mainBtn: document.getElementById('mainBtn'),
+            mainBtnText: document.getElementById('mainBtnText'),
+            resetBtn: document.getElementById('resetBtn'),
+            settingsBtn: document.getElementById('settingsBtn'),
+            drawer: document.getElementById('settingsDrawer'),
+            overlay: document.getElementById('drawerOverlay'),
+            closeSettings: document.getElementById('closeSettings'),
+            saveSettings: document.getElementById('saveSettings'),
+            inputMin: document.getElementById('inputMin'),
+            inputSec: document.getElementById('inputSec'),
+            inputRate: document.getElementById('inputRate'),
+            customGoal: document.getElementById('customGoal'),
+            goalContainer: document.getElementById('goalContainer')
+        };
+
+        // --- Core Logic ---
+
+        function saveState() {
+            localStorage.setItem('shein_timer_v1', JSON.stringify(state));
+        }
+
+        function getTotalInterval() {
+            return (state.intervalMin * 60 + state.intervalSec) * 1000;
+        }
+
+        function updateUI() {
+            const now = Date.now();
+            let totalElapsed = state.offsetTime;
+            
+            if (state.isRunning && state.startTime) {
+                totalElapsed += (now - state.startTime);
+            }
+
+            const intervalMs = getTotalInterval();
+            // Prevent divide by zero if user sets 0:00
+            const safeInterval = intervalMs === 0 ? 1000 : intervalMs;
+
+            const currentCount = Math.floor(totalElapsed / safeInterval);
+            const earnings = currentCount * state.rate;
+            
+            // Progress within current cycle
+            const msIntoCurrent = totalElapsed % safeInterval;
+            const msRemaining = safeInterval - msIntoCurrent;
+            const progressPercent = (msIntoCurrent / safeInterval) * 100;
+
+            // Goal Progress
+            const goalPercent = Math.min((currentCount / state.goal) * 100, 100);
+
+            // Render Text
+            els.count.innerText = currentCount;
+            els.earnings.innerText = earnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            
+            // Render Timer (MM:SS)
+            if (state.isRunning) {
+                const m = Math.floor(msRemaining / 60000);
+                const s = Math.floor((msRemaining % 60000) / 1000);
+                els.timer.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                els.bar.style.width = `${progressPercent}%`;
+                els.status.innerText = "MINING REWARDS...";
+                els.status.classList.add('animate-pulse', 'text-shein-red');
+            } else {
+                // If paused/stopped, show the set interval
+                els.timer.innerText = `${state.intervalMin.toString().padStart(2, '0')}:${state.intervalSec.toString().padStart(2, '0')}`;
+                els.bar.style.width = `0%`;
+                els.status.innerText = "TIMER PAUSED";
+                els.status.classList.remove('animate-pulse', 'text-shein-red');
+            }
+
+            // Render Goal
+            els.goalText.innerText = `Reach ${state.goal} to complete`;
+            els.goalPercent.innerText = `${Math.floor(goalPercent)}%`;
+            els.goalBar.style.width = `${goalPercent}%`;
+            
+            if (currentCount >= state.goal) {
+                els.goalMsg.classList.remove('hidden');
+            } else {
+                els.goalMsg.classList.add('hidden');
+            }
+
+            // Button State
+            if (state.isRunning) {
+                els.mainBtn.innerHTML = '<i class="fa-solid fa-pause"></i> <span>PAUSE</span>';
+                els.mainBtn.classList.remove('shein-black');
+                els.mainBtn.classList.add('bg-white', 'border-2', 'border-black', 'text-black');
+            } else {
+                els.mainBtn.innerHTML = '<i class="fa-solid fa-play"></i> <span>START MINING</span>';
+                els.mainBtn.classList.add('shein-black');
+                els.mainBtn.classList.remove('bg-white', 'border-2', 'border-black', 'text-black');
+            }
+            
+            els.rateDisplay.innerText = `Rate: ₱${state.rate.toFixed(2)}/unit`;
+        }
+
+        // Loop
+        function loop() {
+            updateUI();
+            requestAnimationFrame(loop);
+        }
+
+        // --- Event Handlers ---
+
+        function toggleTimer() {
+            if (state.isRunning) {
+                // Stop: Calculate accumulated time and save it to offset
+                const now = Date.now();
+                state.offsetTime += (now - state.startTime);
+                state.startTime = null;
+                state.isRunning = false;
+            } else {
+                // Start
+                state.startTime = Date.now();
+                state.isRunning = true;
+            }
+            saveState();
+            updateUI();
+        }
+
+        function resetTimer() {
+            if(confirm("Reset all progress?")) {
+                state.startTime = null;
+                state.offsetTime = 0;
+                state.isRunning = false;
+                saveState();
+                updateUI();
+            }
+        }
+
+        // --- Settings Logic ---
+
+        function openSettings() {
+            // Pre-fill values
+            els.inputMin.value = state.intervalMin;
+            els.inputSec.value = state.intervalSec;
+            els.inputRate.value = state.rate;
+            els.customGoal.value = state.goal;
+            renderGoalButtons();
+            
+            els.drawer.classList.remove('drawer-closed');
+            els.drawer.classList.add('drawer-open');
+            els.overlay.classList.remove('hidden');
+        }
+
+        function closeSettings() {
+            els.drawer.classList.add('drawer-closed');
+            els.drawer.classList.remove('drawer-open');
+            els.overlay.classList.add('hidden');
+        }
+
+        function saveConfig() {
+            // If running, we need to "commit" current progress before changing parameters
+            // to prevent jumps, but for simple interval changes, we just update config.
+            // If the interval changes drastically, the count logic (total / interval) 
+            // naturally adjusts based on total time elapsed.
+            
+            state.intervalMin = Math.max(0, parseInt(els.inputMin.value) || 0);
+            state.intervalSec = Math.max(0, parseInt(els.inputSec.value) || 0);
+            state.rate = Math.max(0, parseFloat(els.inputRate.value) || 0);
+            
+            const customG = parseInt(els.customGoal.value);
+            if (customG && customG > 0) state.goal = customG;
+
+            saveState();
+            closeSettings();
+            updateUI(); // Force update
+        }
+
+        function renderGoalButtons() {
+            els.goalContainer.innerHTML = '';
+            [20, 50, 100, 500].forEach(g => {
+                const btn = document.createElement('button');
+                btn.className = `flex-shrink-0 px-6 py-3 font-bold border-2 transition-colors ${state.goal === g ? 'border-black bg-black text-white' : 'border-gray-200 text-gray-400'}`;
+                btn.innerText = g;
+                btn.onclick = () => {
+                    state.goal = g;
+                    els.customGoal.value = g;
+                    renderGoalButtons();
+                };
+                els.goalContainer.appendChild(btn);
+            });
+        }
+
+        // --- Init Listeners ---
+        els.mainBtn.onclick = toggleTimer;
+        els.resetBtn.onclick = resetTimer;
+        els.settingsBtn.onclick = openSettings;
+        els.closeSettings.onclick = closeSettings;
+        els.overlay.onclick = closeSettings;
+        els.saveSettings.onclick = saveConfig;
+
+        // Start Loop
+        requestAnimationFrame(loop);
+
+    </script>
+</body>
+</html>
+
+
+              
