@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHEIN Style Earner</title>
+    <title>myEPC</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -224,6 +224,10 @@
             <button id="mainBtn" class="w-full shein-black py-4 font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg hover:shadow-xl hover:bg-gray-900">
                 <i class="fa-solid fa-play"></i> <span id="mainBtnText">Start Mining</span>
             </button>
+            
+            <button id="finishBtn" class="w-full bg-white border-2 border-dashed border-gray-300 text-gray-400 py-3 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 active:scale-95 transition-all hover:border-red-500 hover:text-red-500 hover:bg-red-50 group">
+                <i class="fa-solid fa-circle-check group-hover:animate-bounce"></i> Mark as Finish
+            </button>
         </div>
 
     </div>
@@ -438,6 +442,7 @@
             goalMsg: document.getElementById('goalReachedMsg'),
             mainBtn: document.getElementById('mainBtn'),
             mainBtnText: document.getElementById('mainBtnText'),
+            finishBtn: document.getElementById('finishBtn'),
             resetAllBtn: document.getElementById('resetAllBtn'),
             resetCycleBtn: document.getElementById('resetCycleBtn'),
             
@@ -626,6 +631,19 @@
             const msRemaining = safeInterval - msIntoCurrent;
             const progressPercent = (msIntoCurrent / safeInterval) * 100;
 
+            // Check if passed 50% for Finish Button
+            const isHalfway = msIntoCurrent >= (safeInterval / 2);
+            if (isHalfway) {
+                els.finishBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+                els.finishBtn.classList.add('hover:border-red-500', 'hover:text-red-500', 'hover:bg-red-50', 'active:scale-95');
+                els.finishBtn.innerHTML = '<i class="fa-solid fa-circle-check group-hover:animate-bounce"></i> Mark as Finish';
+            } else {
+                els.finishBtn.classList.add('opacity-40', 'cursor-not-allowed');
+                els.finishBtn.classList.remove('hover:border-red-500', 'hover:text-red-500', 'hover:bg-red-50', 'active:scale-95');
+                // Optional: Show countdown on button or just keep text
+                els.finishBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Locked (Wait 50%)';
+            }
+
             const goalPercent = Math.min((currentCount / state.goal) * 100, 100);
 
             // Text Updates
@@ -749,6 +767,46 @@
                 state.isRunning = true;
                 if(audioCtx.state === 'suspended') audioCtx.resume();
             }
+            saveState();
+            updateUI();
+        }
+
+        function finishCycle() {
+            // Calculate time needed to finish current cycle
+            const now = Date.now();
+            let totalElapsed = state.offsetTime;
+            if (state.isRunning && state.startTime) {
+                totalElapsed += (now - state.startTime);
+            }
+            
+            const intervalMs = getTotalInterval();
+            if(intervalMs === 0) return;
+
+            // RESTRICTION: Check if at least 50% has passed
+            const msIntoCurrent = totalElapsed % intervalMs;
+            if (msIntoCurrent < (intervalMs / 2)) {
+                // Double check calculation to be safe, but UI should prevent this mostly
+                alert("⏳ Too Early! You must complete at least 50% of the timer before marking as finished.");
+                return;
+            }
+
+            // Target is the start of the next integer count
+            const currentCount = Math.floor(totalElapsed / intervalMs);
+            const targetTime = (currentCount + 1) * intervalMs;
+            
+            // Add the difference to offsetTime to effectively "skip" the remaining time
+            // This preserves the current "session" time if running, just fast-forwards the progress
+            const added = targetTime - totalElapsed;
+            state.offsetTime += added;
+            
+            // Trigger effects
+            playCoinSound();
+            spawnFloatingText(state.rate);
+            triggerNumberPop();
+            
+            // Only spawn confetti if goal reached or randomly for fun
+            if ((currentCount + 1) % 5 === 0) spawnConfetti(); 
+
             saveState();
             updateUI();
         }
@@ -891,6 +949,7 @@
 
         // --- Init Listeners ---
         els.mainBtn.onclick = toggleTimer;
+        els.finishBtn.onclick = finishCycle;
         els.settingsBtn.onclick = openSettings;
         els.historyBtn.onclick = openHistory;
         els.achievementsBtn.onclick = openAchievements;
