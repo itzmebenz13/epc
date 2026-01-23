@@ -20,13 +20,6 @@
         .bg-shein-red { background-color: #ff4545; }
         .shein-black { background-color: #000; color: #fff; }
         
-        /* Flash Sale Animation */
-        @keyframes flash {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
-        .animate-flash { animation: flash 2s infinite; }
-        
         /* Slanted Progress Bar */
         .skew-bar { transform: skewX(-10deg); }
         
@@ -52,44 +45,116 @@
         /* Hide Scrollbar */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Floating Text Animation */
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-50px) scale(1.2); opacity: 0; }
+        }
+        .float-anim { animation: floatUp 1.5s ease-out forwards; pointer-events: none; }
+
+        /* Entrance Animations (Stagger) */
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .stagger-1 { animation: slideUpFade 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; animation-delay: 0.1s; }
+        .stagger-2 { animation: slideUpFade 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; animation-delay: 0.2s; }
+        .stagger-3 { animation: slideUpFade 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; animation-delay: 0.3s; }
+        .stagger-4 { animation: slideUpFade 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; animation-delay: 0.4s; }
+
+        /* Number Pop Effect */
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); color: #ff4545; }
+            100% { transform: scale(1); }
+        }
+        .pop-effect { animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        /* Shimmer Effect for Wallet */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .shimmer-bg {
+            background: linear-gradient(90deg, #fff 0%, #fff 40%, #fff0f0 50%, #fff 60%, #fff 100%);
+            background-size: 200% 100%;
+            animation: shimmer 3s infinite linear;
+        }
+
+        /* Marquee Animation */
+        .marquee-container { overflow: hidden; white-space: nowrap; position: relative; }
+        .marquee-content { display: inline-block; animation: marquee 20s linear infinite; }
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Confetti Particles */
+        @keyframes confettiFall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+        .confetti-particle { position: absolute; width: 8px; height: 8px; animation: confettiFall 2.5s linear forwards; z-index: 60; pointer-events: none; }
+
+        /* Rank Badge Gradients */
+        .rank-silver { background: linear-gradient(135deg, #e0e0e0, #9ca3af); color: #000; }
+        .rank-gold { background: linear-gradient(135deg, #fcd34d, #d97706); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+        .rank-platinum { background: linear-gradient(135deg, #e0f2fe, #3b82f6); color: #fff; }
+        .rank-member { background: #333; color: #fff; }
+
+        .grayscale-100 { filter: grayscale(100%); opacity: 0.5; }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-900 min-h-screen pb-20 select-none overflow-x-hidden w-full">
+<body class="bg-gray-100 text-gray-900 min-h-screen pb-20 select-none overflow-x-hidden w-full relative">
 
     <!-- Sticky Header -->
     <div class="shein-black px-4 py-3 flex justify-between items-center sticky top-0 z-20 shadow-md">
         <div class="flex items-center gap-2">
-            <i class="fa-solid fa-bag-shopping text-xl"></i>
+            <span id="rankBadge" class="text-[9px] uppercase font-black px-1.5 py-0.5 rounded rank-member tracking-wider transition-all duration-300">MEMBER</span>
             <span class="font-black text-xl tracking-tighter italic">EARN<span class="shein-red">NOW</span></span>
         </div>
         <div class="flex gap-2">
-            <button id="historyBtn" class="p-2 hover:bg-gray-800 rounded-full transition">
+            <button id="achievementsBtn" class="p-2 hover:bg-gray-800 rounded-full transition relative active:scale-90">
+                <i class="fa-solid fa-trophy text-lg text-yellow-400"></i>
+                <div id="newBadgeDot" class="hidden absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-black animate-ping"></div>
+            </button>
+            <button id="historyBtn" class="p-2 hover:bg-gray-800 rounded-full transition active:scale-90">
                 <i class="fa-solid fa-clock-rotate-left text-lg"></i>
             </button>
-            <button id="settingsBtn" class="p-2 hover:bg-gray-800 rounded-full transition">
+            <button id="settingsBtn" class="p-2 hover:bg-gray-800 rounded-full transition active:scale-90">
                 <i class="fa-solid fa-gear text-lg"></i>
             </button>
         </div>
     </div>
 
-    <!-- Flash Sale Banner -->
-    <div class="bg-shein-red text-white text-xs font-bold py-1 px-2 flex justify-center items-center gap-2 animate-flash uppercase tracking-wide">
-        <i class="fa-solid fa-bolt"></i>
-        <span>Limited Time Earning Event</span>
-        <i class="fa-solid fa-bolt"></i>
+    <!-- Scrolling Marquee Banner -->
+    <div class="bg-shein-red text-white text-xs font-bold py-1 overflow-hidden relative">
+        <div class="marquee-container">
+            <div class="marquee-content uppercase tracking-wide">
+                <i class="fa-solid fa-bolt mx-2"></i> Limited Time Earning Event 
+                <i class="fa-solid fa-bolt mx-2"></i> High Rates Active 
+                <i class="fa-solid fa-gift mx-2"></i> Complete Daily Goals for Bonus 
+                <i class="fa-solid fa-bolt mx-2"></i> Keep App Open to Mine
+                <i class="fa-solid fa-bolt mx-2"></i> Limited Time Earning Event 
+            </div>
+        </div>
     </div>
 
     <!-- Main Content -->
-    <div class="max-w-md mx-auto w-full pt-4 px-4 space-y-4">
+    <div class="max-w-md mx-auto w-full pt-4 px-4 space-y-4 relative">
+
+        <!-- Floating Particles Container -->
+        <div id="floatingContainer" class="fixed inset-0 pointer-events-none z-50 overflow-hidden"></div>
 
         <!-- Timer Card -->
-        <div class="bg-white p-6 shadow-sm relative overflow-hidden border-b-2 border-gray-200">
+        <div class="bg-white p-6 shadow-sm relative overflow-hidden border-b-2 border-gray-200 stagger-1">
             <div class="absolute top-0 left-0 shein-black text-[10px] font-bold px-2 py-1 uppercase tracking-widest">
                 Next Drop In
             </div>
             
             <div class="text-center mt-4">
-                <div id="timerDisplay" class="text-6xl font-black tracking-tighter text-black tabular-nums">
+                <div id="timerDisplay" class="text-6xl font-black tracking-tighter text-black tabular-nums transition-all">
                     04:00
                 </div>
                 <p id="statusText" class="text-xs text-gray-400 font-bold uppercase tracking-[0.2em] mt-2">
@@ -104,29 +169,43 @@
         </div>
 
         <!-- Stats Grid -->
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-2 gap-3 stagger-2">
             <!-- Count Box -->
-            <div class="flex flex-col p-4 bg-white border border-gray-200 shadow-sm relative overflow-hidden">
+            <div class="flex flex-col p-4 bg-white border border-gray-200 shadow-sm relative overflow-hidden group hover:border-black transition-colors">
                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Total Count</span>
                 <div class="flex items-baseline">
-                    <span id="countDisplay" class="text-3xl font-black tracking-tighter text-black truncate w-full">0</span>
+                    <span id="countDisplay" class="text-3xl font-black tracking-tighter text-black truncate w-full inline-block origin-left">0</span>
                     <span class="text-xs font-bold text-gray-400 ml-1 absolute right-4 bottom-5">PCS</span>
                 </div>
             </div>
 
-            <!-- Earnings Box -->
-            <div class="flex flex-col p-4 bg-white border border-gray-200 border-b-2 border-b-black shadow-sm relative overflow-hidden">
+            <!-- Earnings Box (Shimmering) -->
+            <div class="flex flex-col p-4 bg-white border border-gray-200 border-b-2 border-b-black shadow-sm relative overflow-hidden shimmer-bg">
                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Wallet</span>
                 <div class="flex items-baseline gap-0.5">
                     <span class="text-sm font-bold mt-1 text-gray-900">₱</span>
-                    <span id="earningsDisplay" class="text-3xl font-black tracking-tighter shein-red truncate w-full">0.00</span>
+                    <span id="earningsDisplay" class="text-3xl font-black tracking-tighter shein-red truncate w-full inline-block origin-left">0.00</span>
                 </div>
                 <span id="rateDisplay" class="text-[10px] text-gray-400 font-medium mt-1 truncate">Rate: ₱1.00</span>
             </div>
         </div>
 
+        <!-- Total Time Box -->
+        <div class="bg-white p-3 border border-gray-200 shadow-sm flex justify-between items-center stagger-3">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 shein-black flex items-center justify-center rounded-full shadow-sm">
+                    <i class="fa-solid fa-hourglass-half text-xs"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider leading-none">Total Time</span>
+                    <span class="text-[9px] text-gray-300 font-bold uppercase tracking-widest">Consumed</span>
+                </div>
+            </div>
+            <span id="totalTimeDisplay" class="text-2xl font-black tracking-tighter text-black tabular-nums">00:00:00</span>
+        </div>
+
         <!-- Goal / Coupon Tracker -->
-        <div class="bg-white relative shadow-sm border border-dashed border-gray-300 p-5 mt-2">
+        <div class="bg-white relative shadow-sm border border-dashed border-gray-300 p-5 mt-2 stagger-4">
             <!-- Cutout Circles -->
             <div class="coupon-notch notch-left border-r border-gray-300"></div>
             <div class="coupon-notch notch-right border-l border-gray-300"></div>
@@ -136,24 +215,24 @@
                     <h3 class="font-black text-lg uppercase italic text-black leading-none mb-1">Daily Goal</h3>
                     <p id="goalText" class="text-xs text-gray-500 font-medium truncate">Reach 20 to complete</p>
                 </div>
-                <div id="goalPercentText" class="shein-black text-xs font-bold px-2 py-1 flex-shrink-0">
+                <div id="goalPercentText" class="shein-black text-xs font-bold px-2 py-1 flex-shrink-0 transition-transform duration-300">
                     0%
                 </div>
             </div>
             
             <div class="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                <div id="goalBar" class="h-full bg-shein-red transition-all duration-500" style="width: 0%"></div>
+                <div id="goalBar" class="h-full bg-shein-red transition-all duration-500 ease-out" style="width: 0%"></div>
             </div>
             
             <!-- Goal Reached Banner -->
-            <div id="goalReachedMsg" class="hidden mt-3 bg-red-50 text-red-600 text-center py-2 text-xs font-bold border border-red-200 flex justify-center items-center gap-2">
-                <i class="fa-solid fa-gift animate-bounce"></i> GOAL REACHED!
+            <div id="goalReachedMsg" class="hidden mt-3 bg-red-50 text-red-600 text-center py-2 text-xs font-bold border border-red-200 flex justify-center items-center gap-2 animate-bounce">
+                <i class="fa-solid fa-gift"></i> GOAL REACHED!
             </div>
         </div>
 
         <!-- Controls -->
-        <div class="grid grid-cols-1 gap-3 pt-2">
-            <button id="mainBtn" class="w-full shein-black py-4 font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-lg hover:bg-gray-900">
+        <div class="grid grid-cols-1 gap-3 pt-2 stagger-4">
+            <button id="mainBtn" class="w-full shein-black py-4 font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg hover:shadow-xl hover:bg-gray-900">
                 <i class="fa-solid fa-play"></i> <span id="mainBtnText">Start Mining</span>
             </button>
         </div>
@@ -161,13 +240,13 @@
     </div>
 
     <!-- Overlay -->
-    <div id="drawerOverlay" class="fixed inset-0 bg-black/60 z-30 hidden backdrop-blur-sm"></div>
+    <div id="drawerOverlay" class="fixed inset-0 bg-black/60 z-30 hidden backdrop-blur-sm transition-opacity duration-300"></div>
 
     <!-- Settings Drawer -->
     <div id="settingsDrawer" class="fixed bottom-0 left-0 right-0 bg-white z-40 rounded-t-3xl p-6 drawer drawer-closed shadow-[0_-10px_40px_rgba(0,0,0,0.2)] max-h-[85vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-6 sticky top-0 bg-white z-10 pb-2 border-b border-gray-100">
             <h2 class="text-xl font-black uppercase tracking-tighter">Config</h2>
-            <button class="close-drawer w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200">
+            <button class="close-drawer w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
@@ -197,6 +276,17 @@
                 </div>
             </div>
 
+             <!-- Sound Toggle -->
+             <div class="flex justify-between items-center border-t border-b border-gray-100 py-3">
+                <div>
+                    <span class="block text-sm font-bold">Sound Effects</span>
+                    <span class="text-[10px] text-gray-400">Play 'Cha-ching' on earn</span>
+                </div>
+                <button id="toggleSoundBtn" class="bg-black text-white px-3 py-1 text-xs font-bold rounded uppercase transition-colors">
+                    ON
+                </button>
+            </div>
+
             <!-- Goal Presets -->
             <div>
                 <label class="block text-[10px] font-bold uppercase text-gray-400 mb-2">Target Goal</label>
@@ -204,25 +294,40 @@
                     <!-- Goals injected by JS -->
                 </div>
                 <div class="mt-2">
-                     <input type="number" id="customGoal" placeholder="Custom Goal" class="w-full bg-gray-50 border-b-2 border-gray-200 focus:border-black outline-none p-2 text-sm font-bold">
+                     <input type="number" id="customGoal" placeholder="Custom Goal" class="w-full bg-gray-50 border-b-2 border-gray-200 focus:border-black outline-none p-2 text-sm font-bold transition-colors">
                 </div>
             </div>
 
-            <button id="saveSettings" class="w-full bg-shein-red text-white py-4 font-black uppercase tracking-widest text-sm mt-2 active:scale-95 transition-transform shadow-lg">
+            <button id="saveSettings" class="w-full bg-shein-red text-white py-4 font-black uppercase tracking-widest text-sm mt-2 active:scale-95 transition-transform shadow-lg hover:shadow-xl">
                 Save Changes
             </button>
             
             <hr class="border-gray-100">
 
+            <!-- Data Backup Section -->
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <label class="block text-[10px] font-bold uppercase text-gray-400 mb-2">Data Backup & Restore</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <button id="exportBtn" class="bg-gray-800 text-white py-3 font-bold text-[10px] uppercase rounded active:scale-95 transition-transform flex items-center justify-center gap-2 hover:bg-gray-700">
+                        <i class="fa-solid fa-download"></i> Save Code
+                    </button>
+                    <button id="importBtn" class="bg-white border-2 border-gray-200 text-gray-800 py-3 font-bold text-[10px] uppercase rounded active:scale-95 transition-transform flex items-center justify-center gap-2 hover:bg-gray-50">
+                        <i class="fa-solid fa-upload"></i> Load Code
+                    </button>
+                </div>
+                <p class="text-[9px] text-gray-400 mt-2 text-center leading-tight">Copy "Save Code" to keep your progress safe externally.</p>
+            </div>
+
+            <hr class="border-gray-100">
+
             <div class="grid grid-cols-2 gap-3">
-                <button id="resetCycleBtn" class="bg-gray-100 text-gray-800 py-3 font-bold text-xs uppercase rounded active:scale-95 transition-transform">
+                <button id="resetCycleBtn" class="bg-gray-100 text-gray-800 py-3 font-bold text-xs uppercase rounded active:scale-95 transition-transform hover:bg-gray-200">
                     <i class="fa-solid fa-rotate-left mr-1"></i> Restart Cycle
                 </button>
-                <button id="resetAllBtn" class="bg-black text-white py-3 font-bold text-xs uppercase rounded active:scale-95 transition-transform">
+                <button id="resetAllBtn" class="bg-black text-white py-3 font-bold text-xs uppercase rounded active:scale-95 transition-transform hover:bg-gray-800">
                     <i class="fa-solid fa-trash mr-1"></i> Reset All Data
                 </button>
             </div>
-            <p class="text-center text-[10px] text-gray-400">Reset Cycle restarts the 4m countdown. Reset All wipes progress.</p>
         </div>
     </div>
 
@@ -230,23 +335,32 @@
     <div id="historyDrawer" class="fixed bottom-0 left-0 right-0 bg-white z-40 rounded-t-3xl p-6 drawer drawer-closed shadow-[0_-10px_40px_rgba(0,0,0,0.2)] max-h-[85vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-6 sticky top-0 bg-white z-10 pb-2 border-b border-gray-100">
             <h2 class="text-xl font-black uppercase tracking-tighter">Earnings History</h2>
-            <button class="close-drawer w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200">
+            <button class="close-drawer w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
         
-        <div class="space-y-1" id="historyList">
-            <!-- History Items Injected Here -->
-            <div class="text-center py-8 text-gray-400 text-xs uppercase tracking-widest font-bold">
-                No history recorded yet
-            </div>
-        </div>
+        <div class="space-y-1" id="historyList"></div>
         
         <div class="mt-8 p-4 bg-gray-50 rounded-lg text-center">
             <p class="text-[10px] text-gray-400 uppercase font-bold mb-1">Current Session Started</p>
             <p id="sessionStartDisplay" class="text-sm font-bold">--</p>
         </div>
         <p class="text-center text-[10px] text-gray-400 mt-4">Records daily earnings at 12:00 MN (Manila)</p>
+    </div>
+
+    <!-- Achievements Drawer -->
+    <div id="achievementsDrawer" class="fixed bottom-0 left-0 right-0 bg-white z-40 rounded-t-3xl p-6 drawer drawer-closed shadow-[0_-10px_40px_rgba(0,0,0,0.2)] max-h-[85vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6 sticky top-0 bg-white z-10 pb-2 border-b border-gray-100">
+            <h2 class="text-xl font-black uppercase tracking-tighter text-yellow-500"><i class="fa-solid fa-crown mr-2"></i>Awards</h2>
+            <button class="close-drawer w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        
+        <div class="grid grid-cols-3 gap-4" id="achievementsGrid">
+            <!-- Achievements Injected Here -->
+        </div>
     </div>
 
     <script>
@@ -256,25 +370,69 @@
             intervalMin: 4,
             intervalSec: 0,
             rate: 1.00,
-            startTime: null, // timestamp when started
-            offsetTime: 0,   // accumulated ms from previous sessions
+            startTime: null,
+            offsetTime: 0,
             isRunning: false,
-            // History Tracking
-            history: [], // [{ date: '2023-10-25', amount: 500 }, ...]
-            lastSnapshotEarnings: 0, // Earnings at start of current day
-            lastDate: null // Manila date string
+            history: [], 
+            lastSnapshotEarnings: 0, 
+            lastDate: null,
+            soundEnabled: true,
+            // Achievements
+            achieved: [] 
         };
 
-        // Try to load state
-        let state = JSON.parse(localStorage.getItem('shein_timer_v2'));
+        let state = JSON.parse(localStorage.getItem('shein_timer_v2')) || DEFAULT_STATE;
+
+        // Migrations
+        if (state.soundEnabled === undefined) state.soundEnabled = true;
+        if (!state.achieved) state.achieved = [];
+
+        // --- Audio Context ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
-        // Migration from v1 to v2 if needed (simple check)
-        if (!state && localStorage.getItem('shein_timer_v1')) {
-            const old = JSON.parse(localStorage.getItem('shein_timer_v1'));
-            state = { ...DEFAULT_STATE, ...old };
-        } else if (!state) {
-            state = DEFAULT_STATE;
+        function playCoinSound() {
+            if (!state.soundEnabled) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(2000, audioCtx.currentTime + 0.1);
+            
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+
+            setTimeout(() => {
+                const osc2 = audioCtx.createOscillator();
+                const gain2 = audioCtx.createGain();
+                osc2.type = 'triangle';
+                osc2.frequency.setValueAtTime(2500, audioCtx.currentTime);
+                gain2.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+                osc2.connect(gain2);
+                gain2.connect(audioCtx.destination);
+                osc2.start();
+                osc2.stop(audioCtx.currentTime + 0.2);
+            }, 50);
         }
+
+        // --- Achievement Config ---
+        const ACHIEVEMENTS = [
+            { id: 'start', title: 'Rookie', desc: 'First Count', threshold: 1, icon: 'fa-star' },
+            { id: 'bronze', title: 'Hustler', desc: 'Reach 20 Count', threshold: 20, icon: 'fa-medal' },
+            { id: 'silver', title: 'Silver', desc: 'Reach 100 Count', threshold: 100, icon: 'fa-trophy' },
+            { id: 'gold', title: 'Gold', desc: 'Reach 500 Count', threshold: 500, icon: 'fa-crown' },
+            { id: 'rich', title: 'Earner', desc: 'Earn ₱100.00', threshold: 100, type: 'money', icon: 'fa-sack-dollar' },
+            { id: 'time', title: 'Night Owl', desc: '1 Hour Worked', threshold: 3600, type: 'time', icon: 'fa-clock' }
+        ];
 
         // --- DOM Elements ---
         const els = {
@@ -284,6 +442,7 @@
             count: document.getElementById('countDisplay'),
             earnings: document.getElementById('earningsDisplay'),
             rateDisplay: document.getElementById('rateDisplay'),
+            totalTime: document.getElementById('totalTimeDisplay'),
             goalText: document.getElementById('goalText'),
             goalPercent: document.getElementById('goalPercentText'),
             goalBar: document.getElementById('goalBar'),
@@ -295,11 +454,22 @@
             
             settingsBtn: document.getElementById('settingsBtn'),
             settingsDrawer: document.getElementById('settingsDrawer'),
+            toggleSoundBtn: document.getElementById('toggleSoundBtn'),
+            exportBtn: document.getElementById('exportBtn'),
+            importBtn: document.getElementById('importBtn'),
             
             historyBtn: document.getElementById('historyBtn'),
             historyDrawer: document.getElementById('historyDrawer'),
             historyList: document.getElementById('historyList'),
             sessionStartDisplay: document.getElementById('sessionStartDisplay'),
+
+            achievementsBtn: document.getElementById('achievementsBtn'),
+            achievementsDrawer: document.getElementById('achievementsDrawer'),
+            achievementsGrid: document.getElementById('achievementsGrid'),
+            newBadgeDot: document.getElementById('newBadgeDot'),
+
+            rankBadge: document.getElementById('rankBadge'),
+            floatingContainer: document.getElementById('floatingContainer'),
 
             overlay: document.getElementById('drawerOverlay'),
             closeButtons: document.querySelectorAll('.close-drawer'),
@@ -315,12 +485,9 @@
         // --- Core Helpers ---
 
         function getManilaDateStr() {
-            // Returns YYYY-MM-DD in Manila Time
             try {
-                // Sweden/Canada locale uses YYYY-MM-DD format which is easy to parse/sort
                 return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' });
             } catch (e) {
-                // Fallback if browser doesn't support IANA zones (rare now)
                 return new Date().toISOString().split('T')[0];
             }
         }
@@ -334,7 +501,6 @@
         }
 
         function calculateCurrentTotalEarnings() {
-            // This mirrors updateUI logic to get exact current earnings
             const now = Date.now();
             let totalElapsed = state.offsetTime;
             if (state.isRunning && state.startTime) {
@@ -346,43 +512,103 @@
             return currentCount * state.rate;
         }
 
-        // --- Midnight Rollover Logic ---
         function checkMidnight() {
             const today = getManilaDateStr();
-            
-            // Initialize if first run
             if (!state.lastDate) {
                 state.lastDate = today;
                 state.lastSnapshotEarnings = calculateCurrentTotalEarnings();
                 saveState();
                 return;
             }
-
-            // If date changed
             if (state.lastDate !== today) {
                 const currentTotal = calculateCurrentTotalEarnings();
-                
-                // Calculate what was earned "Yesterday" (or since last check)
-                // Logic: Total Now - What we had at start of yesterday
-                // Note: If user changes RATE, this calculation is imperfect but robust for simple tracking.
                 const dailyEarned = Math.max(0, currentTotal - state.lastSnapshotEarnings);
-                
                 if (dailyEarned > 0 || state.history.length > 0) {
-                    state.history.unshift({
-                        date: state.lastDate,
-                        amount: dailyEarned
-                    });
-                    
-                    // Keep last 30 entries
+                    state.history.unshift({ date: state.lastDate, amount: dailyEarned });
                     if (state.history.length > 30) state.history.pop();
                 }
-
-                // Reset snapshot for the new day
                 state.lastSnapshotEarnings = currentTotal;
                 state.lastDate = today;
                 saveState();
-                renderHistory(); // Update UI if open
+                renderHistory();
             }
+        }
+
+        function updateRank(currentCount) {
+            els.rankBadge.className = "text-[9px] uppercase font-black px-1.5 py-0.5 rounded tracking-wider shadow-sm transition-all duration-300";
+            if(currentCount >= 1000) {
+                els.rankBadge.classList.add("rank-platinum");
+                els.rankBadge.innerText = "PLATINUM";
+            } else if (currentCount >= 500) {
+                els.rankBadge.classList.add("rank-gold");
+                els.rankBadge.innerText = "GOLD";
+            } else if (currentCount >= 100) {
+                els.rankBadge.classList.add("rank-silver");
+                els.rankBadge.innerText = "SILVER";
+            } else {
+                els.rankBadge.classList.add("rank-member");
+                els.rankBadge.innerText = "MEMBER";
+            }
+        }
+
+        function spawnFloatingText(amount) {
+            const el = document.createElement('div');
+            el.className = "float-anim absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl font-black text-shein-red z-50 text-shadow";
+            el.innerText = `+₱${amount.toFixed(2)}`;
+            el.style.textShadow = "0 2px 0 #fff, 0 -1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff"; 
+            els.floatingContainer.appendChild(el);
+            setTimeout(() => el.remove(), 1500);
+        }
+
+        function spawnConfetti() {
+            const colors = ['#ff4545', '#000000', '#fbbf24', '#3b82f6'];
+            for(let i=0; i<30; i++) {
+                const p = document.createElement('div');
+                p.className = 'confetti-particle';
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                p.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+                p.style.animationDelay = (Math.random() * 0.5) + 's';
+                els.floatingContainer.appendChild(p);
+                setTimeout(() => p.remove(), 4000);
+            }
+        }
+
+        function checkAchievements(count, earnings, totalSeconds) {
+            let newUnlock = false;
+            ACHIEVEMENTS.forEach(ach => {
+                if(state.achieved.includes(ach.id)) return;
+                
+                let passed = false;
+                if(!ach.type && count >= ach.threshold) passed = true;
+                if(ach.type === 'money' && earnings >= ach.threshold) passed = true;
+                if(ach.type === 'time' && totalSeconds >= ach.threshold) passed = true;
+
+                if(passed) {
+                    state.achieved.push(ach.id);
+                    newUnlock = true;
+                }
+            });
+            
+            if(newUnlock) {
+                saveState();
+                els.newBadgeDot.classList.remove('hidden');
+                spawnConfetti(); // Celebration for achievement too
+            }
+        }
+
+        // --- Main Loop ---
+        
+        let lastKnownCount = -1;
+        let goalCelebratedToday = false; // Just localized state for current session
+
+        function triggerNumberPop() {
+            els.count.classList.remove('pop-effect');
+            els.earnings.classList.remove('pop-effect');
+            // Trigger reflow
+            void els.count.offsetWidth;
+            els.count.classList.add('pop-effect');
+            els.earnings.classList.add('pop-effect');
         }
 
         function updateUI() {
@@ -399,6 +625,14 @@
             const currentCount = Math.floor(totalElapsed / safeInterval);
             const earnings = currentCount * state.rate;
             
+            // Visual Triggers on count increase
+            if (lastKnownCount !== -1 && currentCount > lastKnownCount) {
+                playCoinSound();
+                spawnFloatingText(state.rate);
+                triggerNumberPop();
+            }
+            lastKnownCount = currentCount;
+
             const msIntoCurrent = totalElapsed % safeInterval;
             const msRemaining = safeInterval - msIntoCurrent;
             const progressPercent = (msIntoCurrent / safeInterval) * 100;
@@ -409,6 +643,13 @@
             els.count.innerText = currentCount;
             els.earnings.innerText = earnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             
+            // Total Time
+            const totalSec = Math.floor(totalElapsed / 1000);
+            const hh = Math.floor(totalSec / 3600);
+            const mm = Math.floor((totalSec % 3600) / 60);
+            const ss = totalSec % 60;
+            els.totalTime.innerText = `${hh.toString().padStart(2, '0')}:${mm.toString().padStart(2, '0')}:${ss.toString().padStart(2, '0')}`;
+
             const m = Math.floor(msRemaining / 60000);
             const s = Math.floor((msRemaining % 60000) / 1000);
             
@@ -435,23 +676,64 @@
             
             if (currentCount >= state.goal) {
                 els.goalMsg.classList.remove('hidden');
+                // Celebrate once per session/reset when hitting goal
+                if(!goalCelebratedToday) {
+                    spawnConfetti();
+                    goalCelebratedToday = true;
+                }
             } else {
                 els.goalMsg.classList.add('hidden');
+                goalCelebratedToday = false;
             }
             
             els.rateDisplay.innerText = `Rate: ₱${state.rate.toFixed(2)}/unit`;
-            
-            // Session info
-            if(state.lastDate) {
-                els.sessionStartDisplay.innerText = `Tracking since: ${state.lastDate}`;
-            }
+            if(state.lastDate) els.sessionStartDisplay.innerText = `Tracking since: ${state.lastDate}`;
+
+            updateRank(currentCount);
+            checkAchievements(currentCount, earnings, totalSec);
         }
 
-        // Loop
         function loop() {
-            checkMidnight(); // Check date
+            checkMidnight();
             updateUI();
             requestAnimationFrame(loop);
+        }
+
+        // --- Persistence Hooks ---
+        setInterval(() => saveState(), 30000);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') saveState();
+        });
+        window.addEventListener('beforeunload', () => saveState());
+
+        // Export/Import
+        function exportSave() {
+            saveState(); 
+            const dataStr = JSON.stringify(state);
+            navigator.clipboard.writeText(dataStr).then(() => {
+                alert("SAVE CODE COPIED TO CLIPBOARD!\n\nPaste this code in a safe place (Notes, Email, etc). Use 'Load Code' to restore it later.");
+            }).catch(err => {
+                prompt("Copy your Save Code manually:", dataStr);
+            });
+        }
+        function importSave() {
+            const dataStr = prompt("Paste your Save Code here:");
+            if (!dataStr) return;
+            try {
+                const loadedState = JSON.parse(dataStr);
+                if (typeof loadedState.goal !== 'number' || typeof loadedState.rate !== 'number') throw new Error("Invalid Save File");
+                if(confirm("Load this data? Current progress will be overwritten.")) {
+                    state = { ...DEFAULT_STATE, ...loadedState }; 
+                    saveState();
+                    updateUI();
+                    renderHistory();
+                    renderAchievements();
+                    closeDrawers();
+                    alert("Data Loaded Successfully!");
+                }
+            } catch (e) {
+                alert("Error: Invalid Save Code.");
+            }
         }
 
         // --- Actions ---
@@ -465,33 +747,25 @@
             } else {
                 state.startTime = Date.now();
                 state.isRunning = true;
+                if(audioCtx.state === 'suspended') audioCtx.resume();
             }
             saveState();
             updateUI();
         }
 
         function resetCycle() {
-            // Resets the countdown to the start of the interval (e.g. 4:00)
-            // Logic: remove the partial progress from the offset
             if(!confirm("Restart the current countdown clock? (Your earnings/count are safe)")) return;
-            
-            // Calculate current accumulated time
             const now = Date.now();
             let totalElapsed = state.offsetTime;
-            if (state.isRunning && state.startTime) {
-                totalElapsed += (now - state.startTime);
-            }
+            if (state.isRunning && state.startTime) totalElapsed += (now - state.startTime);
             
             const intervalMs = getTotalInterval();
             if(intervalMs === 0) return;
-
-            // Remove the remainder
             const remainder = totalElapsed % intervalMs;
             const newTotal = totalElapsed - remainder;
             
-            // Apply back to state
             state.offsetTime = newTotal;
-            if(state.isRunning) state.startTime = now; // Reset start reference
+            if(state.isRunning) state.startTime = now;
             
             saveState();
             updateUI();
@@ -499,24 +773,34 @@
         }
 
         function resetAllData() {
-            if(confirm("⚠ FACTORY RESET: This will wipe ALL count, earnings, and history. Are you sure?")) {
+            if(confirm("⚠ FACTORY RESET: This will wipe ALL count, earnings, history, and achievements. Are you sure?")) {
                 state = DEFAULT_STATE;
-                // re-init date
+                state.soundEnabled = true;
                 state.lastDate = getManilaDateStr();
+                state.achieved = [];
                 saveState();
                 updateUI();
                 renderHistory();
+                renderAchievements();
                 closeDrawers();
             }
         }
 
-        // --- Drawer Logic ---
+        function toggleSound() {
+            state.soundEnabled = !state.soundEnabled;
+            els.toggleSoundBtn.innerText = state.soundEnabled ? "ON" : "OFF";
+            els.toggleSoundBtn.className = state.soundEnabled 
+                ? "bg-black text-white px-3 py-1 text-xs font-bold rounded uppercase transition-colors"
+                : "bg-gray-200 text-gray-400 px-3 py-1 text-xs font-bold rounded uppercase transition-colors";
+            saveState();
+        }
+
+        // --- Drawers & Rendering ---
 
         function closeDrawers() {
-            els.settingsDrawer.classList.add('drawer-closed');
-            els.settingsDrawer.classList.remove('drawer-open');
-            els.historyDrawer.classList.add('drawer-closed');
-            els.historyDrawer.classList.remove('drawer-open');
+            els.settingsDrawer.classList.remove('drawer-open'); els.settingsDrawer.classList.add('drawer-closed');
+            els.historyDrawer.classList.remove('drawer-open'); els.historyDrawer.classList.add('drawer-closed');
+            els.achievementsDrawer.classList.remove('drawer-open'); els.achievementsDrawer.classList.add('drawer-closed');
             els.overlay.classList.add('hidden');
         }
 
@@ -525,17 +809,25 @@
             els.inputSec.value = state.intervalSec;
             els.inputRate.value = state.rate;
             els.customGoal.value = state.goal;
+            els.toggleSoundBtn.innerText = state.soundEnabled ? "ON" : "OFF";
+            els.toggleSoundBtn.className = state.soundEnabled 
+                ? "bg-black text-white px-3 py-1 text-xs font-bold rounded uppercase transition-colors"
+                : "bg-gray-200 text-gray-400 px-3 py-1 text-xs font-bold rounded uppercase transition-colors";
             renderGoalButtons();
-            
-            els.settingsDrawer.classList.remove('drawer-closed');
-            els.settingsDrawer.classList.add('drawer-open');
+            els.settingsDrawer.classList.add('drawer-open'); els.settingsDrawer.classList.remove('drawer-closed');
             els.overlay.classList.remove('hidden');
         }
 
         function openHistory() {
             renderHistory();
-            els.historyDrawer.classList.remove('drawer-closed');
-            els.historyDrawer.classList.add('drawer-open');
+            els.historyDrawer.classList.add('drawer-open'); els.historyDrawer.classList.remove('drawer-closed');
+            els.overlay.classList.remove('hidden');
+        }
+
+        function openAchievements() {
+            renderAchievements();
+            els.newBadgeDot.classList.add('hidden'); 
+            els.achievementsDrawer.classList.add('drawer-open'); els.achievementsDrawer.classList.remove('drawer-closed');
             els.overlay.classList.remove('hidden');
         }
 
@@ -569,28 +861,31 @@
         function renderHistory() {
             els.historyList.innerHTML = '';
             if(!state.history || state.history.length === 0) {
-                els.historyList.innerHTML = `
-                    <div class="text-center py-8 text-gray-400 text-xs uppercase tracking-widest font-bold">
-                        No history recorded yet<br>
-                        <span class="text-[9px] font-normal normal-case">Wait for 12AM Manila Time</span>
-                    </div>
-                `;
+                els.historyList.innerHTML = `<div class="text-center py-8 text-gray-400 text-xs uppercase tracking-widest font-bold">No history recorded yet<br><span class="text-[9px] font-normal normal-case">Wait for 12AM Manila Time</span></div>`;
                 return;
             }
-
             state.history.forEach(item => {
                 const row = document.createElement('div');
                 row.className = "flex justify-between items-center p-3 bg-gray-50 border-b border-gray-100 last:border-0";
-                row.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-gray-200">
-                            <i class="fa-regular fa-calendar text-xs text-gray-400"></i>
-                        </div>
-                        <span class="text-xs font-bold text-gray-700">${item.date}</span>
-                    </div>
-                    <span class="font-black text-sm text-shein-red">+₱${item.amount.toFixed(2)}</span>
-                `;
+                row.innerHTML = `<div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-gray-200"><i class="fa-regular fa-calendar text-xs text-gray-400"></i></div><span class="text-xs font-bold text-gray-700">${item.date}</span></div><span class="font-black text-sm text-shein-red">+₱${item.amount.toFixed(2)}</span>`;
                 els.historyList.appendChild(row);
+            });
+        }
+
+        function renderAchievements() {
+            els.achievementsGrid.innerHTML = '';
+            ACHIEVEMENTS.forEach(ach => {
+                const isUnlocked = state.achieved.includes(ach.id);
+                const card = document.createElement('div');
+                card.className = `flex flex-col items-center justify-center p-3 rounded-lg border text-center ${isUnlocked ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-100 grayscale-100'}`;
+                card.innerHTML = `
+                    <div class="w-10 h-10 rounded-full ${isUnlocked ? 'bg-yellow-400 text-black shadow-md' : 'bg-gray-200 text-gray-400'} flex items-center justify-center mb-2 text-lg">
+                        <i class="fa-solid ${ach.icon}"></i>
+                    </div>
+                    <span class="text-[10px] font-black uppercase mb-0.5 ${isUnlocked ? 'text-black' : 'text-gray-400'}">${ach.title}</span>
+                    <span class="text-[9px] text-gray-400 font-medium leading-tight">${ach.desc}</span>
+                `;
+                els.achievementsGrid.appendChild(card);
             });
         }
 
@@ -598,10 +893,13 @@
         els.mainBtn.onclick = toggleTimer;
         els.settingsBtn.onclick = openSettings;
         els.historyBtn.onclick = openHistory;
+        els.achievementsBtn.onclick = openAchievements;
+        els.toggleSoundBtn.onclick = toggleSound;
+        els.exportBtn.onclick = exportSave;
+        els.importBtn.onclick = importSave;
         
         els.closeButtons.forEach(btn => btn.onclick = closeDrawers);
         els.overlay.onclick = closeDrawers;
-        
         els.saveSettings.onclick = saveConfig;
         els.resetCycleBtn.onclick = resetCycle;
         els.resetAllBtn.onclick = resetAllData;
