@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>myEPC</title>
+    <title>SHEIN Style Earner</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -70,17 +70,6 @@
             100% { transform: scale(1); }
         }
         .pop-effect { animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-
-        /* Shimmer Effect for Wallet */
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        .shimmer-bg {
-            background: linear-gradient(90deg, #fff 0%, #fff 40%, #fff0f0 50%, #fff 60%, #fff 100%);
-            background-size: 200% 100%;
-            animation: shimmer 3s infinite linear;
-        }
 
         /* Marquee Animation */
         .marquee-container { overflow: hidden; white-space: nowrap; position: relative; }
@@ -179,8 +168,8 @@
                 </div>
             </div>
 
-            <!-- Earnings Box (Shimmering) -->
-            <div class="flex flex-col p-4 bg-white border border-gray-200 border-b-2 border-b-black shadow-sm relative overflow-hidden shimmer-bg">
+            <!-- Earnings Box (Removed Shimmer) -->
+            <div class="flex flex-col p-4 bg-white border border-gray-200 border-b-2 border-b-black shadow-sm relative overflow-hidden">
                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Wallet</span>
                 <div class="flex items-baseline gap-0.5">
                     <span class="text-sm font-bold mt-1 text-gray-900">₱</span>
@@ -656,18 +645,29 @@
             els.timer.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
             els.bar.style.width = `${progressPercent}%`;
 
+            // Button State
             if (state.isRunning) {
+                // Show PAUSE button (White bg, Black text)
                 els.status.innerText = "MINING REWARDS...";
                 els.status.classList.add('animate-pulse', 'text-shein-red');
                 els.mainBtn.innerHTML = '<i class="fa-solid fa-pause"></i> <span>PAUSE</span>';
-                els.mainBtn.classList.remove('shein-black');
-                els.mainBtn.classList.add('bg-white', 'border-2', 'border-black', 'text-black');
+                
+                // Remove Dark Theme Classes (and remove the dark hover)
+                els.mainBtn.classList.remove('shein-black', 'hover:bg-gray-900');
+                
+                // Add Light Theme Classes (with correct light hover)
+                els.mainBtn.classList.add('bg-white', 'border-2', 'border-black', 'text-black', 'hover:bg-gray-50');
             } else {
+                // Show START button (Black bg, White text)
                 els.status.innerText = "TIMER PAUSED";
                 els.status.classList.remove('animate-pulse', 'text-shein-red');
                 els.mainBtn.innerHTML = '<i class="fa-solid fa-play"></i> <span>START MINING</span>';
-                els.mainBtn.classList.add('shein-black');
-                els.mainBtn.classList.remove('bg-white', 'border-2', 'border-black', 'text-black');
+                
+                // Add Dark Theme Classes (with dark hover)
+                els.mainBtn.classList.add('shein-black', 'hover:bg-gray-900');
+                
+                // Remove Light Theme Classes
+                els.mainBtn.classList.remove('bg-white', 'border-2', 'border-black', 'text-black', 'hover:bg-gray-50');
             }
 
             els.goalText.innerText = `Reach ${state.goal} to complete`;
