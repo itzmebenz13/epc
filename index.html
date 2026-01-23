@@ -157,44 +157,69 @@
             </div>
         </div>
 
-        <!-- Stats Grid -->
-        <div class="grid grid-cols-2 gap-3 stagger-2">
-            <!-- Count Box -->
-            <div class="flex flex-col p-4 bg-white border border-gray-200 shadow-sm relative overflow-hidden group hover:border-black transition-colors">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Total Count</span>
-                <div class="flex items-baseline">
-                    <span id="countDisplay" class="text-3xl font-black tracking-tighter text-black truncate w-full inline-block origin-left">0</span>
-                    <span class="text-xs font-bold text-gray-400 ml-1 absolute right-4 bottom-5">PCS</span>
+        <!-- Stats Section -->
+        <div class="space-y-3 stagger-2">
+            
+            <!-- Earnings Grid -->
+            <div class="grid grid-cols-2 gap-3">
+                <!-- Earnings Today -->
+                <div class="flex flex-col p-4 bg-white border border-gray-200 border-b-2 border-b-black shadow-sm relative overflow-hidden group hover:border-black transition-colors">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Earned Today</span>
+                    <div class="flex items-baseline gap-0.5">
+                        <span class="text-xs font-bold mt-1 text-gray-900">₱</span>
+                        <span id="earningsTodayDisplay" class="text-2xl font-black tracking-tighter shein-red truncate">0.00</span>
+                    </div>
+                </div>
+
+                <!-- Lifetime Earnings -->
+                <div class="flex flex-col p-4 bg-white border border-gray-200 border-b-2 border-b-black shadow-sm relative overflow-hidden group hover:border-black transition-colors">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Lifetime Earned</span>
+                    <div class="flex items-baseline gap-0.5">
+                        <span class="text-xs font-bold mt-1 text-gray-900">₱</span>
+                        <span id="earningsTotalDisplay" class="text-2xl font-black tracking-tighter shein-red truncate">0.00</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Rate Strip -->
+            <div class="bg-gray-50 border border-gray-200 px-3 py-1.5 flex justify-between items-center rounded-sm">
+                 <span class="text-[10px] font-bold text-gray-400 uppercase">Current Rate</span>
+                 <span id="rateDisplay" class="text-[10px] font-bold text-black font-mono">₱1.00/unit</span>
+            </div>
+
+            <!-- Counts Grid -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-white p-3 border border-gray-200 shadow-sm relative overflow-hidden group hover:border-black transition-colors">
+                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Count Today</span>
+                    <div class="flex items-baseline">
+                        <span id="countTodayDisplay" class="text-2xl font-black tracking-tighter text-black">0</span>
+                        <span class="text-[9px] font-bold text-gray-400 ml-1">PCS</span>
+                    </div>
+                </div>
+                <div class="bg-white p-3 border border-gray-200 shadow-sm relative overflow-hidden group hover:border-black transition-colors">
+                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Total Count</span>
+                    <div class="flex items-baseline">
+                        <span id="countTotalDisplay" class="text-2xl font-black tracking-tighter text-black">0</span>
+                        <span class="text-[9px] font-bold text-gray-400 ml-1">PCS</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Earnings Box (Removed Shimmer) -->
-            <div class="flex flex-col p-4 bg-white border border-gray-200 border-b-2 border-b-black shadow-sm relative overflow-hidden">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Wallet</span>
-                <div class="flex items-baseline gap-0.5">
-                    <span class="text-sm font-bold mt-1 text-gray-900">₱</span>
-                    <span id="earningsDisplay" class="text-3xl font-black tracking-tighter shein-red truncate w-full inline-block origin-left">0.00</span>
+            <!-- Times Grid -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-white p-3 border border-gray-200 shadow-sm">
+                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Time Today</span>
+                    <span id="timeTodayDisplay" class="text-xl font-black tracking-tighter text-black tabular-nums block">00:00:00</span>
                 </div>
-                <span id="rateDisplay" class="text-[10px] text-gray-400 font-medium mt-1 truncate">Rate: ₱1.00</span>
-            </div>
-        </div>
-
-        <!-- Total Time Box -->
-        <div class="bg-white p-3 border border-gray-200 shadow-sm flex justify-between items-center stagger-3">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 shein-black flex items-center justify-center rounded-full shadow-sm">
-                    <i class="fa-solid fa-hourglass-half text-xs"></i>
-                </div>
-                <div class="flex flex-col">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider leading-none">Total Time</span>
-                    <span class="text-[9px] text-gray-300 font-bold uppercase tracking-widest">Consumed</span>
+                <div class="bg-white p-3 border border-gray-200 shadow-sm">
+                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Total Time</span>
+                    <span id="timeTotalDisplay" class="text-xl font-black tracking-tighter text-black tabular-nums block">00:00:00</span>
                 </div>
             </div>
-            <span id="totalTimeDisplay" class="text-2xl font-black tracking-tighter text-black tabular-nums">00:00:00</span>
         </div>
 
         <!-- Goal / Coupon Tracker -->
-        <div class="bg-white relative shadow-sm border border-dashed border-gray-300 p-5 mt-2 stagger-4">
+        <div class="bg-white relative shadow-sm border border-dashed border-gray-300 p-5 mt-2 stagger-3">
             <!-- Cutout Circles -->
             <div class="coupon-notch notch-left border-r border-gray-300"></div>
             <div class="coupon-notch notch-right border-l border-gray-300"></div>
@@ -364,13 +389,18 @@
             intervalSec: 0,
             rate: 1.00,
             startTime: null,
-            offsetTime: 0,
+            offsetTime: 0, // Used for Interval/Count calc (includes skips)
+            actualWorkTime: 0, // Used for Total Time Consumed (EXCLUDES skips)
+            
+            // Daily Snapshots (Midnight Logic)
+            lastSnapshotEarnings: 0, 
+            lastSnapshotCount: 0,
+            lastSnapshotWorkTime: 0,
+            lastDate: null,
+            
             isRunning: false,
             history: [], 
-            lastSnapshotEarnings: 0, 
-            lastDate: null,
             soundEnabled: true,
-            // Achievements
             achieved: [] 
         };
 
@@ -379,6 +409,9 @@
         // Migrations
         if (state.soundEnabled === undefined) state.soundEnabled = true;
         if (!state.achieved) state.achieved = [];
+        if (state.actualWorkTime === undefined) state.actualWorkTime = state.offsetTime;
+        if (state.lastSnapshotCount === undefined) state.lastSnapshotCount = 0;
+        if (state.lastSnapshotWorkTime === undefined) state.lastSnapshotWorkTime = 0;
 
         // --- Audio Context ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -432,10 +465,17 @@
             timer: document.getElementById('timerDisplay'),
             status: document.getElementById('statusText'),
             bar: document.getElementById('progressBar'),
-            count: document.getElementById('countDisplay'),
-            earnings: document.getElementById('earningsDisplay'),
+            
+            // New Stat Elements
+            countToday: document.getElementById('countTodayDisplay'),
+            countTotal: document.getElementById('countTotalDisplay'),
+            timeToday: document.getElementById('timeTodayDisplay'),
+            timeTotal: document.getElementById('timeTotalDisplay'),
+            
+            earningsToday: document.getElementById('earningsTodayDisplay'),
+            earningsTotal: document.getElementById('earningsTotalDisplay'),
             rateDisplay: document.getElementById('rateDisplay'),
-            totalTime: document.getElementById('totalTimeDisplay'),
+            
             goalText: document.getElementById('goalText'),
             goalPercent: document.getElementById('goalPercentText'),
             goalBar: document.getElementById('goalBar'),
@@ -494,35 +534,52 @@
             return (state.intervalMin * 60 + state.intervalSec) * 1000;
         }
 
-        function calculateCurrentTotalEarnings() {
+        function getCurrentStats() {
             const now = Date.now();
-            let totalElapsed = state.offsetTime;
+            let sessionDuration = 0;
             if (state.isRunning && state.startTime) {
-                totalElapsed += (now - state.startTime);
+                sessionDuration = (now - state.startTime);
             }
+            const totalIntervalElapsed = state.offsetTime + sessionDuration;
+            const totalRealElapsed = state.actualWorkTime + sessionDuration;
+            
             const intervalMs = getTotalInterval();
             const safeInterval = intervalMs === 0 ? 1000 : intervalMs;
-            const currentCount = Math.floor(totalElapsed / safeInterval);
-            return currentCount * state.rate;
+            
+            const currentCount = Math.floor(totalIntervalElapsed / safeInterval);
+            const earnings = currentCount * state.rate;
+            
+            return { currentCount, earnings, totalRealElapsed };
         }
 
         function checkMidnight() {
             const today = getManilaDateStr();
+            const { currentCount, earnings, totalRealElapsed } = getCurrentStats();
+            
+            // Init Logic
             if (!state.lastDate) {
                 state.lastDate = today;
-                state.lastSnapshotEarnings = calculateCurrentTotalEarnings();
+                state.lastSnapshotEarnings = earnings;
+                state.lastSnapshotCount = currentCount;
+                state.lastSnapshotWorkTime = totalRealElapsed;
                 saveState();
                 return;
             }
+
+            // Midnight Logic
             if (state.lastDate !== today) {
-                const currentTotal = calculateCurrentTotalEarnings();
-                const dailyEarned = Math.max(0, currentTotal - state.lastSnapshotEarnings);
+                const dailyEarned = Math.max(0, earnings - state.lastSnapshotEarnings);
                 if (dailyEarned > 0 || state.history.length > 0) {
                     state.history.unshift({ date: state.lastDate, amount: dailyEarned });
                     if (state.history.length > 30) state.history.pop();
                 }
-                state.lastSnapshotEarnings = currentTotal;
+                
+                // Update Snapshots
+                state.lastSnapshotEarnings = earnings;
+                state.lastSnapshotCount = currentCount;
+                state.lastSnapshotWorkTime = totalRealElapsed;
                 state.lastDate = today;
+                
                 saveState();
                 renderHistory();
             }
@@ -594,31 +651,52 @@
         // --- Main Loop ---
         
         let lastKnownCount = -1;
-        let goalCelebratedToday = false; // Just localized state for current session
+        let goalCelebratedToday = false; 
 
         function triggerNumberPop() {
-            els.count.classList.remove('pop-effect');
-            els.earnings.classList.remove('pop-effect');
+            els.countToday.classList.remove('pop-effect');
+            els.countTotal.classList.remove('pop-effect');
+            els.earningsToday.classList.remove('pop-effect');
+            els.earningsTotal.classList.remove('pop-effect');
             // Trigger reflow
-            void els.count.offsetWidth;
-            els.count.classList.add('pop-effect');
-            els.earnings.classList.add('pop-effect');
+            void els.countToday.offsetWidth;
+            els.countToday.classList.add('pop-effect');
+            els.countTotal.classList.add('pop-effect');
+            els.earningsToday.classList.add('pop-effect');
+            els.earningsTotal.classList.add('pop-effect');
+        }
+
+        function formatTime(ms) {
+            const totalSec = Math.floor(ms / 1000);
+            const hh = Math.floor(totalSec / 3600);
+            const mm = Math.floor((totalSec % 3600) / 60);
+            const ss = totalSec % 60;
+            return `${hh.toString().padStart(2, '0')}:${mm.toString().padStart(2, '0')}:${ss.toString().padStart(2, '0')}`;
         }
 
         function updateUI() {
             const now = Date.now();
-            let totalElapsed = state.offsetTime;
+            let sessionDuration = 0;
             
             if (state.isRunning && state.startTime) {
-                totalElapsed += (now - state.startTime);
+                sessionDuration = (now - state.startTime);
             }
+
+            // Calculations
+            let totalIntervalElapsed = state.offsetTime + sessionDuration;
+            let totalRealElapsed = state.actualWorkTime + sessionDuration;
 
             const intervalMs = getTotalInterval();
             const safeInterval = intervalMs === 0 ? 1000 : intervalMs;
 
-            const currentCount = Math.floor(totalElapsed / safeInterval);
+            const currentCount = Math.floor(totalIntervalElapsed / safeInterval);
             const earnings = currentCount * state.rate;
             
+            // Today Calc
+            const countToday = Math.max(0, currentCount - (state.lastSnapshotCount || 0));
+            const timeTodayMs = Math.max(0, totalRealElapsed - (state.lastSnapshotWorkTime || 0));
+            const earningsToday = Math.max(0, earnings - (state.lastSnapshotEarnings || 0));
+
             // Visual Triggers on count increase
             if (lastKnownCount !== -1 && currentCount > lastKnownCount) {
                 playCoinSound();
@@ -627,7 +705,7 @@
             }
             lastKnownCount = currentCount;
 
-            const msIntoCurrent = totalElapsed % safeInterval;
+            const msIntoCurrent = totalIntervalElapsed % safeInterval;
             const msRemaining = safeInterval - msIntoCurrent;
             const progressPercent = (msIntoCurrent / safeInterval) * 100;
 
@@ -640,22 +718,20 @@
             } else {
                 els.finishBtn.classList.add('opacity-40', 'cursor-not-allowed');
                 els.finishBtn.classList.remove('hover:border-red-500', 'hover:text-red-500', 'hover:bg-red-50', 'active:scale-95');
-                // Optional: Show countdown on button or just keep text
                 els.finishBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Locked (Wait 50%)';
             }
 
             const goalPercent = Math.min((currentCount / state.goal) * 100, 100);
 
             // Text Updates
-            els.count.innerText = currentCount;
-            els.earnings.innerText = earnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            els.earningsToday.innerText = earningsToday.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            els.earningsTotal.innerText = earnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             
-            // Total Time
-            const totalSec = Math.floor(totalElapsed / 1000);
-            const hh = Math.floor(totalSec / 3600);
-            const mm = Math.floor((totalSec % 3600) / 60);
-            const ss = totalSec % 60;
-            els.totalTime.innerText = `${hh.toString().padStart(2, '0')}:${mm.toString().padStart(2, '0')}:${ss.toString().padStart(2, '0')}`;
+            els.countToday.innerText = countToday;
+            els.countTotal.innerText = currentCount;
+            
+            els.timeToday.innerText = formatTime(timeTodayMs);
+            els.timeTotal.innerText = formatTime(totalRealElapsed);
 
             const m = Math.floor(msRemaining / 60000);
             const s = Math.floor((msRemaining % 60000) / 1000);
@@ -665,26 +741,16 @@
 
             // Button State
             if (state.isRunning) {
-                // Show PAUSE button (White bg, Black text)
                 els.status.innerText = "MINING REWARDS...";
                 els.status.classList.add('animate-pulse', 'text-shein-red');
                 els.mainBtn.innerHTML = '<i class="fa-solid fa-pause"></i> <span>PAUSE</span>';
-                
-                // Remove Dark Theme Classes (and remove the dark hover)
                 els.mainBtn.classList.remove('shein-black', 'hover:bg-gray-900');
-                
-                // Add Light Theme Classes (with correct light hover)
                 els.mainBtn.classList.add('bg-white', 'border-2', 'border-black', 'text-black', 'hover:bg-gray-50');
             } else {
-                // Show START button (Black bg, White text)
                 els.status.innerText = "TIMER PAUSED";
                 els.status.classList.remove('animate-pulse', 'text-shein-red');
                 els.mainBtn.innerHTML = '<i class="fa-solid fa-play"></i> <span>START MINING</span>';
-                
-                // Add Dark Theme Classes (with dark hover)
                 els.mainBtn.classList.add('shein-black', 'hover:bg-gray-900');
-                
-                // Remove Light Theme Classes
                 els.mainBtn.classList.remove('bg-white', 'border-2', 'border-black', 'text-black', 'hover:bg-gray-50');
             }
 
@@ -694,7 +760,6 @@
             
             if (currentCount >= state.goal) {
                 els.goalMsg.classList.remove('hidden');
-                // Celebrate once per session/reset when hitting goal
                 if(!goalCelebratedToday) {
                     spawnConfetti();
                     goalCelebratedToday = true;
@@ -708,7 +773,7 @@
             if(state.lastDate) els.sessionStartDisplay.innerText = `Tracking since: ${state.lastDate}`;
 
             updateRank(currentCount);
-            checkAchievements(currentCount, earnings, totalSec);
+            checkAchievements(currentCount, earnings, Math.floor(totalRealElapsed/1000));
         }
 
         function loop() {
@@ -759,7 +824,12 @@
         function toggleTimer() {
             if (state.isRunning) {
                 const now = Date.now();
-                state.offsetTime += (now - state.startTime);
+                const sessionDuration = now - state.startTime;
+                
+                // Add to BOTH counters when running normally
+                state.offsetTime += sessionDuration;
+                state.actualWorkTime += sessionDuration;
+                
                 state.startTime = null;
                 state.isRunning = false;
             } else {
@@ -774,29 +844,28 @@
         function finishCycle() {
             // Calculate time needed to finish current cycle
             const now = Date.now();
-            let totalElapsed = state.offsetTime;
+            let totalIntervalElapsed = state.offsetTime;
+            
             if (state.isRunning && state.startTime) {
-                totalElapsed += (now - state.startTime);
+                totalIntervalElapsed += (now - state.startTime);
             }
             
             const intervalMs = getTotalInterval();
             if(intervalMs === 0) return;
 
             // RESTRICTION: Check if at least 50% has passed
-            const msIntoCurrent = totalElapsed % intervalMs;
+            const msIntoCurrent = totalIntervalElapsed % intervalMs;
             if (msIntoCurrent < (intervalMs / 2)) {
-                // Double check calculation to be safe, but UI should prevent this mostly
                 alert("⏳ Too Early! You must complete at least 50% of the timer before marking as finished.");
                 return;
             }
 
             // Target is the start of the next integer count
-            const currentCount = Math.floor(totalElapsed / intervalMs);
+            const currentCount = Math.floor(totalIntervalElapsed / intervalMs);
             const targetTime = (currentCount + 1) * intervalMs;
             
-            // Add the difference to offsetTime to effectively "skip" the remaining time
-            // This preserves the current "session" time if running, just fast-forwards the progress
-            const added = targetTime - totalElapsed;
+            // Add difference to offsetTime only
+            const added = targetTime - totalIntervalElapsed;
             state.offsetTime += added;
             
             // Trigger effects
@@ -804,7 +873,6 @@
             spawnFloatingText(state.rate);
             triggerNumberPop();
             
-            // Only spawn confetti if goal reached or randomly for fun
             if ((currentCount + 1) % 5 === 0) spawnConfetti(); 
 
             saveState();
@@ -814,13 +882,15 @@
         function resetCycle() {
             if(!confirm("Restart the current countdown clock? (Your earnings/count are safe)")) return;
             const now = Date.now();
-            let totalElapsed = state.offsetTime;
-            if (state.isRunning && state.startTime) totalElapsed += (now - state.startTime);
+            
+            // Only manipulate offsetTime for cycle reset
+            let totalIntervalElapsed = state.offsetTime;
+            if (state.isRunning && state.startTime) totalIntervalElapsed += (now - state.startTime);
             
             const intervalMs = getTotalInterval();
             if(intervalMs === 0) return;
-            const remainder = totalElapsed % intervalMs;
-            const newTotal = totalElapsed - remainder;
+            const remainder = totalIntervalElapsed % intervalMs;
+            const newTotal = totalIntervalElapsed - remainder;
             
             state.offsetTime = newTotal;
             if(state.isRunning) state.startTime = now;
@@ -836,6 +906,7 @@
                 state.soundEnabled = true;
                 state.lastDate = getManilaDateStr();
                 state.achieved = [];
+                state.actualWorkTime = 0; 
                 saveState();
                 updateUI();
                 renderHistory();
