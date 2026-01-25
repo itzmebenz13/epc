@@ -137,6 +137,11 @@
         </div>
     </div>
 
+    <!-- Hearing Status Bar (Hidden by default) -->
+    <div id="hearingBar" class="bg-gray-900 text-white text-[10px] py-1 px-4 text-center hidden truncate">
+        <i class="fa-solid fa-ear-listen mr-1 text-gray-400"></i> Hearing: <span id="hearingText" class="font-bold text-yellow-400">...</span>
+    </div>
+
     <!-- Scrolling Marquee Banner -->
     <div class="bg-shein-red text-white text-xs font-bold py-1 overflow-hidden relative">
         <div class="marquee-container">
@@ -156,8 +161,8 @@
         <!-- Floating Particles Container -->
         <div id="floatingContainer" class="fixed inset-0 pointer-events-none z-50 overflow-hidden"></div>
         
-        <!-- Toast Container (New) -->
-        <div id="toastContainer" class="fixed top-24 left-0 right-0 pointer-events-none z-50 flex justify-center"></div>
+        <!-- Toast Container -->
+        <div id="toastContainer" class="fixed top-32 left-0 right-0 pointer-events-none z-50 flex justify-center"></div>
 
         <!-- Timer Card -->
         <div class="bg-white p-6 shadow-sm relative overflow-hidden border-b-2 border-gray-200 stagger-1">
@@ -513,54 +518,61 @@
             recognition.onstart = () => {
                 isListening = true;
                 els.voiceBtn.classList.add('mic-active');
-                showToast("Listening... Say 'Start', 'Stop', or 'Finish'");
+                document.getElementById('hearingBar').classList.remove('hidden');
+                showToast("Listening...");
             };
 
             recognition.onend = () => {
+                // Aggressive Restart logic
                 if (isListening) {
                     try { recognition.start(); } catch(e) {}
                 } else {
                     els.voiceBtn.classList.remove('mic-active');
+                    document.getElementById('hearingBar').classList.add('hidden');
                 }
             };
 
             recognition.onresult = (event) => {
                 const now = Date.now();
-                // Cooldown: Ignore commands if executed within last 1.0 seconds
-                if (now - lastVoiceActionTime < 1000) return;
+                // Reduced Cooldown to 0.8s for better responsiveness
+                if (now - lastVoiceActionTime < 800) return;
 
                 // Get the latest result only
                 const last = event.results.length - 1;
-                const transcript = event.results[last][0].transcript.toLowerCase();
+                const transcript = event.results[last][0].transcript.toLowerCase().trim();
                 
-                // Debug log
-                console.log("Voice Heard:", transcript);
+                // Update Hearing Bar
+                document.getElementById('hearingText').innerText = transcript;
 
-                // --- STRICT REGEX COMMAND PARSING ---
-                // \b ensures we match whole words only (e.g. "cargo" won't trigger "go")
+                // --- RELAXED COMMAND PARSING (No Regex Boundaries) ---
+                // We check if the heard phrase *contains* the keyword.
                 
-                const cmdStart = /\b(start|go|begin|resume|run)\b/;
-                const cmdStop = /\b(stop|pause|wait|halt|break|hold)\b/;
-                const cmdFinish = /\b(finish|done|complete|mark)\b/;
+                // START keywords
+                const startWords = ['start', 'go', 'begin', 'resume', 'run', 'play'];
+                // STOP keywords
+                const stopWords = ['stop', 'pause', 'wait', 'halt', 'break', 'hold'];
+                // FINISH keywords
+                const finishWords = ['finish', 'done', 'complete', 'mark'];
 
-                // START COMMANDS
-                if (cmdStart.test(transcript)) {
+                const matchesStart = startWords.some(w => transcript.includes(w));
+                const matchesStop = stopWords.some(w => transcript.includes(w));
+                const matchesFinish = finishWords.some(w => transcript.includes(w));
+
+                if (matchesStart) {
                     if (!state.isRunning) {
                         toggleTimer();
                         showToast("STARTED");
                         lastVoiceActionTime = now;
                     }
                 } 
-                // STOP COMMANDS
-                else if (cmdStop.test(transcript)) {
+                else if (matchesStop) {
                     if (state.isRunning) {
                         toggleTimer();
                         showToast("PAUSED");
                         lastVoiceActionTime = now;
                     }
                 }
-                // FINISH COMMANDS
-                else if (cmdFinish.test(transcript)) {
+                else if (matchesFinish) {
                      const intervalMs = getTotalInterval();
                      const currentElapsed = state.offsetTime + (state.isRunning ? (now - state.startTime) : 0);
                      const msIntoCurrent = currentElapsed % (intervalMs || 1000);
@@ -570,7 +582,6 @@
                          showToast("TASK FINISHED!");
                          lastVoiceActionTime = now;
                      } else {
-                         // Specific feedback so user knows it was heard but rejected
                          showToast("Too Early to Finish!");
                          lastVoiceActionTime = now;
                      }
@@ -582,6 +593,7 @@
                     alert("Microphone access blocked. Please allow access in browser settings.");
                     isListening = false;
                     els.voiceBtn.classList.remove('mic-active');
+                    document.getElementById('hearingBar').classList.add('hidden');
                 }
             };
         }
@@ -593,6 +605,7 @@
                 isListening = false;
                 recognition.stop();
                 els.voiceBtn.classList.remove('mic-active');
+                document.getElementById('hearingBar').classList.add('hidden');
                 showToast("Voice Control Off");
             } else {
                 try {
