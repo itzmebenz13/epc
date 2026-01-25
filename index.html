@@ -507,7 +507,7 @@
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new SpeechRecognition();
             recognition.continuous = true;
-            recognition.interimResults = true; // CHANGED: Enable real-time detection
+            recognition.interimResults = true; 
             recognition.lang = 'en-US';
 
             recognition.onstart = () => {
@@ -526,23 +526,25 @@
 
             recognition.onresult = (event) => {
                 const now = Date.now();
-                // Cooldown: Ignore commands if executed within last 1.5 seconds
-                if (now - lastVoiceActionTime < 1500) return;
+                // Cooldown: Ignore commands if executed within last 1.0 seconds
+                if (now - lastVoiceActionTime < 1000) return;
 
-                let transcript = '';
-                // Gather result
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    transcript += event.results[i][0].transcript;
-                }
-                const command = transcript.trim().toLowerCase();
+                // Get the latest result only
+                const last = event.results.length - 1;
+                const transcript = event.results[last][0].transcript.toLowerCase();
                 
                 // Debug log
-                // console.log("Voice:", command);
+                console.log("Voice Heard:", transcript);
 
-                // --- Command Parsing ---
+                // --- STRICT REGEX COMMAND PARSING ---
+                // \b ensures we match whole words only (e.g. "cargo" won't trigger "go")
                 
+                const cmdStart = /\b(start|go|begin|resume|run)\b/;
+                const cmdStop = /\b(stop|pause|wait|halt|break|hold)\b/;
+                const cmdFinish = /\b(finish|done|complete|mark)\b/;
+
                 // START COMMANDS
-                if (command.includes('go') || command.includes('start') || command.includes('begin') || command.includes('resume')) {
+                if (cmdStart.test(transcript)) {
                     if (!state.isRunning) {
                         toggleTimer();
                         showToast("STARTED");
@@ -550,7 +552,7 @@
                     }
                 } 
                 // STOP COMMANDS
-                else if (command.includes('stop') || command.includes('pause') || command.includes('wait') || command.includes('halt')) {
+                else if (cmdStop.test(transcript)) {
                     if (state.isRunning) {
                         toggleTimer();
                         showToast("PAUSED");
@@ -558,9 +560,7 @@
                     }
                 }
                 // FINISH COMMANDS
-                else if (command.includes('finish') || command.includes('done') || command.includes('complete') || command.includes('mark')) {
-                     // Check UI state visually or just try calling it
-                     // We need to check if button is enabled logic here to avoid alert spam
+                else if (cmdFinish.test(transcript)) {
                      const intervalMs = getTotalInterval();
                      const currentElapsed = state.offsetTime + (state.isRunning ? (now - state.startTime) : 0);
                      const msIntoCurrent = currentElapsed % (intervalMs || 1000);
@@ -570,15 +570,14 @@
                          showToast("TASK FINISHED!");
                          lastVoiceActionTime = now;
                      } else {
-                         // Optional: feedback for too early?
-                         // showToast("Too early to finish!");
-                         // lastVoiceActionTime = now;
+                         // Specific feedback so user knows it was heard but rejected
+                         showToast("Too Early to Finish!");
+                         lastVoiceActionTime = now;
                      }
                 }
             };
             
             recognition.onerror = (event) => {
-                // console.error("Voice Error", event.error);
                 if (event.error === 'not-allowed') {
                     alert("Microphone access blocked. Please allow access in browser settings.");
                     isListening = false;
