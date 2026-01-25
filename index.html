@@ -108,6 +108,9 @@
             100% { opacity: 0; transform: translate(-50%, -20px); }
         }
         .toast-msg { animation: fadeOutUp 2s ease-out forwards; }
+        
+        /* Success flash for hearing bar */
+        .hearing-success { background-color: #22c55e !important; color: white !important; }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-900 min-h-screen pb-20 select-none overflow-x-hidden w-full relative">
@@ -138,7 +141,7 @@
     </div>
 
     <!-- Hearing Status Bar (Hidden by default) -->
-    <div id="hearingBar" class="bg-gray-900 text-white text-[10px] py-1 px-4 text-center hidden truncate">
+    <div id="hearingBar" class="bg-gray-900 text-white text-[10px] py-1 px-4 text-center hidden truncate transition-colors duration-300">
         <i class="fa-solid fa-ear-listen mr-1 text-gray-400"></i> Hearing: <span id="hearingText" class="font-bold text-yellow-400">...</span>
     </div>
 
@@ -503,6 +506,12 @@
             setTimeout(() => t.remove(), 2000);
         }
 
+        function flashHearingSuccess() {
+            const bar = document.getElementById('hearingBar');
+            bar.classList.add('hearing-success');
+            setTimeout(() => bar.classList.remove('hearing-success'), 500);
+        }
+
         function initVoice() {
             if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
                 alert("Voice control requires Chrome or a compatible browser.");
@@ -523,7 +532,6 @@
             };
 
             recognition.onend = () => {
-                // Aggressive Restart logic
                 if (isListening) {
                     try { recognition.start(); } catch(e) {}
                 } else {
@@ -534,57 +542,58 @@
 
             recognition.onresult = (event) => {
                 const now = Date.now();
-                // Reduced Cooldown to 0.8s for better responsiveness
-                if (now - lastVoiceActionTime < 800) return;
+                if (now - lastVoiceActionTime < 1000) return; // 1s cooldown
 
-                // Get the latest result only
                 const last = event.results.length - 1;
                 const transcript = event.results[last][0].transcript.toLowerCase().trim();
                 
-                // Update Hearing Bar
-                document.getElementById('hearingText').innerText = transcript;
+                // Update UI
+                const hearingEl = document.getElementById('hearingText');
+                if(hearingEl) hearingEl.innerText = transcript;
 
-                // --- RELAXED COMMAND PARSING (No Regex Boundaries) ---
-                // We check if the heard phrase *contains* the keyword.
-                
-                // START keywords
+                // Keywords
                 const startWords = ['start', 'go', 'begin', 'resume', 'run', 'play'];
-                // STOP keywords
                 const stopWords = ['stop', 'pause', 'wait', 'halt', 'break', 'hold'];
-                // FINISH keywords
                 const finishWords = ['finish', 'done', 'complete', 'mark'];
 
-                const matchesStart = startWords.some(w => transcript.includes(w));
-                const matchesStop = stopWords.some(w => transcript.includes(w));
-                const matchesFinish = finishWords.some(w => transcript.includes(w));
+                const hasStart = startWords.some(w => transcript.includes(w));
+                const hasStop = stopWords.some(w => transcript.includes(w));
+                const hasFinish = finishWords.some(w => transcript.includes(w));
 
-                if (matchesStart) {
-                    if (!state.isRunning) {
-                        toggleTimer();
-                        showToast("STARTED");
-                        lastVoiceActionTime = now;
-                    }
-                } 
-                else if (matchesStop) {
-                    if (state.isRunning) {
+                // STATE-BASED DECISION MAKING
+                if (state.isRunning) {
+                    // Only listen for STOP or FINISH when running
+                    if (hasStop) {
                         toggleTimer();
                         showToast("PAUSED");
+                        flashHearingSuccess();
                         lastVoiceActionTime = now;
+                        return; 
                     }
-                }
-                else if (matchesFinish) {
-                     const intervalMs = getTotalInterval();
-                     const currentElapsed = state.offsetTime + (state.isRunning ? (now - state.startTime) : 0);
-                     const msIntoCurrent = currentElapsed % (intervalMs || 1000);
-                     
-                     if (msIntoCurrent >= ((intervalMs || 1000) / 2)) {
-                         finishCycle();
-                         showToast("TASK FINISHED!");
+                    if (hasFinish) {
+                         const intervalMs = getTotalInterval();
+                         const currentElapsed = state.offsetTime + (now - state.startTime);
+                         const msIntoCurrent = currentElapsed % (intervalMs || 1000);
+                         
+                         if (msIntoCurrent >= ((intervalMs || 1000) / 2)) {
+                             finishCycle();
+                             showToast("TASK FINISHED!");
+                             flashHearingSuccess();
+                         } else {
+                             showToast("Too Early!");
+                         }
                          lastVoiceActionTime = now;
-                     } else {
-                         showToast("Too Early to Finish!");
-                         lastVoiceActionTime = now;
-                     }
+                         return;
+                    }
+                } else {
+                    // Only listen for START when paused
+                    if (hasStart) {
+                        toggleTimer();
+                        showToast("STARTED");
+                        flashHearingSuccess();
+                        lastVoiceActionTime = now;
+                        return; 
+                    }
                 }
             };
             
