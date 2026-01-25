@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>myEPC</title>
+    <title>SHEIN Style Earner</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -93,6 +93,14 @@
         .rank-member { background: #333; color: #fff; }
 
         .grayscale-100 { filter: grayscale(100%); opacity: 0.5; }
+        
+        /* Voice Pulse */
+        @keyframes micPulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 69, 69, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 69, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 69, 69, 0); }
+        }
+        .mic-active { color: #ff4545; animation: micPulse 1.5s infinite; }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-900 min-h-screen pb-20 select-none overflow-x-hidden w-full relative">
@@ -104,6 +112,11 @@
             <span class="font-black text-xl tracking-tighter italic">EARN<span class="shein-red">NOW</span></span>
         </div>
         <div class="flex gap-2">
+            <!-- Voice Control Button -->
+            <button id="voiceBtn" class="p-2 hover:bg-gray-800 rounded-full transition relative active:scale-90">
+                <i class="fa-solid fa-microphone text-lg"></i>
+            </button>
+            
             <button id="achievementsBtn" class="p-2 hover:bg-gray-800 rounded-full transition relative active:scale-90">
                 <i class="fa-solid fa-trophy text-lg text-yellow-400"></i>
                 <div id="newBadgeDot" class="hidden absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-black animate-ping"></div>
@@ -460,6 +473,72 @@
             { id: 'time', title: 'Night Owl', desc: '1 Hour Worked', threshold: 3600, type: 'time', icon: 'fa-clock' }
         ];
 
+        // --- Voice Control Logic ---
+        let recognition;
+        let isListening = false;
+
+        function initVoice() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert("Voice control is not supported in this browser. Please use Chrome.");
+                return;
+            }
+            
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                isListening = true;
+                els.voiceBtn.classList.add('mic-active');
+            };
+
+            recognition.onend = () => {
+                // If it ends but we think it should be listening, restart it (persistence)
+                if (isListening) {
+                    try { recognition.start(); } catch(e) {}
+                } else {
+                    els.voiceBtn.classList.remove('mic-active');
+                }
+            };
+
+            recognition.onresult = (event) => {
+                const last = event.results.length - 1;
+                const command = event.results[last][0].transcript.trim().toLowerCase();
+                console.log("Voice Command:", command);
+                
+                // --- Command Map ---
+                if (command.includes('go') || command.includes('start')) {
+                    if (!state.isRunning) toggleTimer();
+                } 
+                else if (command.includes('stop') || command.includes('pause')) {
+                    if (state.isRunning) toggleTimer();
+                }
+                else if (command.includes('finish') || command.includes('done')) {
+                     // Only trigger if eligible
+                     // We need to check restrictions inside finishCycle so just call it
+                     finishCycle();
+                }
+            };
+        }
+
+        function toggleVoice() {
+            if(!recognition) initVoice();
+            
+            if(isListening) {
+                isListening = false;
+                recognition.stop();
+                els.voiceBtn.classList.remove('mic-active');
+            } else {
+                try {
+                    recognition.start();
+                } catch(e) {
+                    console.error("Voice start error", e);
+                }
+            }
+        }
+
         // --- DOM Elements ---
         const els = {
             timer: document.getElementById('timerDisplay'),
@@ -491,6 +570,7 @@
             toggleSoundBtn: document.getElementById('toggleSoundBtn'),
             exportBtn: document.getElementById('exportBtn'),
             importBtn: document.getElementById('importBtn'),
+            voiceBtn: document.getElementById('voiceBtn'), // Mic Btn
             
             historyBtn: document.getElementById('historyBtn'),
             historyDrawer: document.getElementById('historyDrawer'),
@@ -1027,6 +1107,7 @@
         els.toggleSoundBtn.onclick = toggleSound;
         els.exportBtn.onclick = exportSave;
         els.importBtn.onclick = importSave;
+        els.voiceBtn.onclick = toggleVoice; // Mic Listener
         
         els.closeButtons.forEach(btn => btn.onclick = closeDrawers);
         els.overlay.onclick = closeDrawers;
